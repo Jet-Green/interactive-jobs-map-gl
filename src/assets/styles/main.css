@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/montserrat';
+@import 'leaflet/dist/leaflet.css';
 
 html {
   scroll-behavior: smooth;
