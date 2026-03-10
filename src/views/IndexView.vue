@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet-providers'
 
 const dialog = ref(false)
+const showContacts = ref(false)
 const selectedClinic = ref<any>(null)
 const showFilters = ref(false)
 const selectedFilters = ref<any[]>([])
@@ -111,7 +112,67 @@ const updateMarkers = () => {
 
 <template>
   <div>
+    <div class="header-overlay">
+      <div class="header-title">Медицинский скаут</div>
+      <div class="header-subtitle">Для врачей и младшего медперсонала</div>
+      <div class="header-stats">Уже 70 организаций нашли своих специалистов</div>
+    </div>
+
     <div id="map" style="height: 100vh"></div>
+
+    <div class="footer-overlay">
+      <v-btn
+        size="x-large"
+        class="footer-button"
+        target="_blank"
+        href="https://vk.ru/medical_scout"
+      >
+        Начать работу
+      </v-btn>
+      <div class="contacts-link" @click="showContacts = true">Реквизиты</div>
+    </div>
+
+    <v-dialog v-model="showContacts" max-width="400" scrim="transparent">
+      <v-card class="glass-card">
+        <v-card-title class="glass-title">
+          <div class="d-flex justify-space-between">
+            <span>Реквизиты</span>
+            <v-btn class="close-btn" @click="showContacts = false">
+              <v-icon icon="mdi-close" size="large"></v-icon>
+            </v-btn>
+          </div>
+        </v-card-title>
+        <v-card-text class="glass-text">
+          <div class="contact-info-item">
+            <div class="contact-label">Название организации</div>
+            <div class="contact-value">
+              ИНДИВИДУАЛЬНЫЙ ПРЕДПРИНИМАТЕЛЬ ГЛАЗЫРИНА АННА ГЕННАДЬЕВНА
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="contact-label">ИНН</div>
+            <div class="contact-value">590775289940</div>
+          </div>
+          <div class="contact-info-item">
+            <div class="contact-label">ОГРН/ОГРНИП</div>
+            <div class="contact-value">324595800023518</div>
+          </div>
+          <div class="contact-info-item">
+            <div class="contact-label">ВК</div>
+            <a href="https://vk.ru/glazyrina_ag" target="_blank" class="contact-link"
+              >https://vk.ru/glazyrina_ag</a
+            >
+          </div>
+          <div class="contact-info-item">
+            <div class="contact-label">Max</div>
+            <div class="contact-value">+7 982 256-45-91</div>
+          </div>
+          <div class="contact-tile">
+            <div class="contact-tile-title">Все права защищены</div>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
 
     <v-btn class="filter-btn" icon size="large" @click="showFilters = !showFilters">
       <v-icon icon="mdi-filter-variant"></v-icon>
@@ -217,13 +278,176 @@ const updateMarkers = () => {
 </template>
 
 <style>
+.header-overlay {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  padding: 16px 32px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.header-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  margin-bottom: 4px;
+}
+
+.header-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 8px;
+}
+
+.header-stats {
+  font-size: 13px;
+  color: rgba(33, 150, 243, 0.9);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .header-overlay {
+    width: calc(100% - 40px);
+    max-width: 400px;
+    padding: 12px 20px;
+  }
+
+  .header-title {
+    font-size: 18px;
+  }
+
+  .header-subtitle {
+    font-size: 12px;
+  }
+
+  .header-stats {
+    font-size: 11px;
+  }
+
+  .filter-btn {
+    top: 110px !important;
+  }
+
+  .filters-container {
+    top: 160px !important;
+  }
+}
+
+.footer-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+}
+
+.contacts-link {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.3), rgba(21, 101, 192, 0.3));
+  border: 1px solid rgba(33, 150, 243, 0.4);
+  border-radius: 16px 16px 0 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 12px 40px;
+  transition: all 0.3s ease;
+}
+
+.contacts-link:hover {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.4), rgba(21, 101, 192, 0.4));
+}
+
+.contact-info-item {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.contact-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.contact-value {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.contact-link {
+  color: #64b5f6 !important;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.contact-link:hover {
+  color: #90caf9 !important;
+  text-decoration: underline;
+}
+
+.contact-tile {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.3), rgba(21, 101, 192, 0.3));
+  border: 1px solid rgba(33, 150, 243, 0.4);
+  border-radius: 16px 16px 0 0;
+  margin: 20px -20px -20px -20px;
+  padding: 16px;
+  text-align: center;
+}
+
+.contact-tile-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.footer-button {
+  background-image: linear-gradient(104deg, #2196f3 39.5%, #1565c0 100%) !important;
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+  color: white !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  padding: 12px 40px !important;
+  transition: background-position 0.3s ease !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 8px 32px rgba(33, 150, 243, 0.4) !important;
+}
+
+.footer-button:hover {
+  background-position: 100% 50%;
+  box-shadow: 0 12px 40px rgba(33, 150, 243, 0.5) !important;
+}
+
 .leaflet-control-attribution {
   display: none;
 }
 
 .filter-btn {
   position: fixed !important;
-  top: 20px !important;
+  top: 140px !important;
   right: 20px !important;
   z-index: 1000 !important;
   background: rgba(255, 255, 255, 0.15) !important;
@@ -243,7 +467,7 @@ const updateMarkers = () => {
 
 .filters-container {
   position: fixed !important;
-  top: 80px !important;
+  top: 200px !important;
   right: 20px !important;
   z-index: 1000 !important;
 }
