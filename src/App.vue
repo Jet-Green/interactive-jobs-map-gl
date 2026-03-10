@@ -11,7 +11,6 @@
           </Transition>
         </RouterView>
       </v-main>
-      <Footer />
     </v-app>
   </v-responsive>
 </template>
