@@ -1,13 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref, computed, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-providers'
 
 const dialog = ref(false)
-const selectedClinic = ref(null)
+const selectedClinic = ref<any>(null)
 const showFilters = ref(false)
-const selectedFilters = ref([])
+const selectedFilters = ref<any[]>([])
 
 const jobCategories = [
   'Врач стоматолог',
@@ -58,7 +58,7 @@ watch(filteredClinics, () => {
   updateMarkers()
 })
 
-const toggleFilter = (category) => {
+const toggleFilter = (category: any) => {
   const index = selectedFilters.value.indexOf(category)
   if (index === -1) {
     selectedFilters.value.push(category)
@@ -67,9 +67,17 @@ const toggleFilter = (category) => {
   }
 }
 
-let map = null
+let map: any = null
 
 onMounted(() => {
+  // Fix for marker icons in production
+  delete (L.Icon.Default.prototype as any)._getIconUrl
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  })
+
   map = L.map('map', {
     zoomControl: false,
   }).setView([58.010259, 56.234195], 5)
@@ -84,13 +92,13 @@ onMounted(() => {
 const updateMarkers = () => {
   if (!map) return
 
-  map.eachLayer((layer) => {
+  map.eachLayer((layer: any) => {
     if (layer instanceof L.Marker) {
       map.removeLayer(layer)
     }
   })
 
-  filteredClinics.value.forEach((clinic) => {
+  filteredClinics.value.forEach((clinic: any) => {
     L.marker([clinic.lat, clinic.lng])
       .addTo(map)
       .on('click', () => {
@@ -114,8 +122,13 @@ const updateMarkers = () => {
         <div class="filters-panel">
           <div class="filters-title">Фильтры</div>
           <div class="filters-chips">
-            <button v-for="category in jobCategories" :key="category" class="glass-chip"
-              :class="{ active: selectedFilters.includes(category) }" @click="toggleFilter(category)">
+            <button
+              v-for="category in jobCategories"
+              :key="category"
+              class="glass-chip"
+              :class="{ active: selectedFilters.includes(category) }"
+              @click="toggleFilter(category)"
+            >
               {{ category }}
             </button>
           </div>
@@ -128,15 +141,22 @@ const updateMarkers = () => {
         <v-card-title class="text-h5 glass-title">
           <div class="d-flex justify-space-between">
             <span class="glass-title-text">{{ selectedClinic.jobName }}</span>
-            <v-btn variant="glass-btn" class="close-btn" @click="dialog = false">
+            <v-btn class="close-btn" @click="dialog = false">
               <v-icon icon="mdi-close" size="large"></v-icon>
             </v-btn>
           </div>
         </v-card-title>
 
         <div v-if="selectedClinic.videoUrl" class="video-container">
-          <iframe :src="selectedClinic.videoUrl" style="border: none" allow="clipboard-write; autoplay"
-            webkitAllowFullScreen mozallowfullscreen allowFullScreen allowfullscreen></iframe>
+          <iframe
+            :src="selectedClinic.videoUrl"
+            style="border: none"
+            allow="clipboard-write; autoplay"
+            webkitAllowFullScreen
+            mozallowfullscreen
+            allowFullScreen
+            allowfullscreen
+          ></iframe>
         </div>
 
         <v-card-text class="glass-text">
@@ -149,15 +169,15 @@ const updateMarkers = () => {
             <v-icon icon="mdi-web" size="small" class="glass-icon"></v-icon>
             <a :href="selectedClinic.website" target="_blank" class="glass-link">{{
               selectedClinic.website
-              }}</a>
+            }}</a>
           </div>
 
           <div class="glass-info-item" v-if="selectedClinic.vk">
-            <img src="/icons/vk-com.png" style="height: 20px; height: 20PX;" alt="">
+            <img src="/icons/vk-com.png" style="height: 20px; height: 20px" alt="" />
             <!-- <v-icon icon="mdi-vk-box" size="small" class="glass-icon"></v-icon> -->
             <a :href="selectedClinic.vk" target="_blank" class="glass-link">{{
               selectedClinic.vk
-              }}</a>
+            }}</a>
           </div>
 
           <div class="glass-info-item flex-col" v-if="selectedClinic.description">
@@ -181,7 +201,12 @@ const updateMarkers = () => {
           </div>
 
           <div class="accent-button-container">
-            <v-btn size="x-large" class="accent-button" target="_blank" :href="'https://vk.ru/medical_scout'">
+            <v-btn
+              size="x-large"
+              class="accent-button"
+              target="_blank"
+              :href="'https://vk.ru/medical_scout'"
+            >
               УЗНАТЬ УСЛОВИЯ
             </v-btn>
           </div>
@@ -304,9 +329,11 @@ const updateMarkers = () => {
 }
 
 .glass-img {
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.1),
-      rgba(255, 255, 255, 0.05)) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.05)
+  ) !important;
 }
 
 .video-container {
@@ -321,9 +348,11 @@ const updateMarkers = () => {
 }
 
 .glass-title {
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.2),
-      rgba(255, 255, 255, 0.1)) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.1)
+  ) !important;
   backdrop-filter: blur(10px);
   padding: 16px 20px !important;
   font-weight: 600 !important;
@@ -349,6 +378,7 @@ const updateMarkers = () => {
   padding: 6px !important;
   min-width: 40px !important;
   height: 40px !important;
+  background: rgba(0, 0, 0, 0.3) !important;
 }
 
 .glass-text {
@@ -412,9 +442,11 @@ const updateMarkers = () => {
 }
 
 .glass-btn:hover {
-  background: linear-gradient(135deg,
-      rgba(0, 0, 0, 0.8),
-      rgba(0, 0, 0, 0.6) rgba(255, 255, 255, 0.15)) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.8),
+    rgba(0, 0, 0, 0.6) rgba(255, 255, 255, 0.15)
+  ) !important;
   transform: scale(1.02);
   box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
 }
