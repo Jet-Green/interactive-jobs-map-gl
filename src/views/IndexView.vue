@@ -1,16 +1,25 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-providers'
 
 const dialog = ref(false)
 const selectedClinic = ref(null)
+const showFilters = ref(false)
+const selectedFilters = ref([])
+
+const jobCategories = [
+  'Врач стоматолог',
+  'Средний медицинский персонал',
+  'Младший медицинский персонал',
+  'Главврач, управляющий',
+]
 
 const clinics = [
   {
     id: 1,
-    jobName: 'Стоматолог-терапевт',
+    jobName: 'Врач стоматолог',
     address: 'ул. Примерная, д. 10, Москва',
     website: 'https://example-clinic.ru',
     vk: 'https://vk.com/example',
@@ -20,11 +29,12 @@ const clinics = [
     chiefName: 'Иванов Иван Иванович',
     lat: 52.3676,
     lng: 4.9041,
-    videoUrl: 'https://rutube.ru/play/embed/cb7b3c0aad5c8a1e5cf5d22f59cc65b3/',
+    videoUrl:
+      'https://rutube.ru/play/embed/06ba0043e2957dbcce7ecb0f439413b0//?r=https%3A%2F%2Fexample.com',
   },
   {
     id: 2,
-    jobName: 'Стоматолог-хирург',
+    jobName: 'Врач стоматолог',
     address: 'ул. Ленина, д. 5, Санкт-Петербург',
     website: 'https://example-clinic2.ru',
     vk: 'https://vk.com/example2',
@@ -34,12 +44,33 @@ const clinics = [
     chiefName: 'Петров Петр Петрович',
     lat: 59.9343,
     lng: 30.3351,
-    videoUrl: 'https://rutube.ru/play/embed/cb7b3c0aad5c8a1e5cf5d22f59cc65b3/',
+    videoUrl:
+      'https://rutube.ru/play/embed/aac34142d9de4de977839c54860ca029//?r=https%3A%2F%2Fexample.com',
   },
 ]
 
+const filteredClinics = computed(() => {
+  if (selectedFilters.value.length === 0) return clinics
+  return clinics.filter((c) => selectedFilters.value.includes(c.jobName))
+})
+
+watch(filteredClinics, () => {
+  updateMarkers()
+})
+
+const toggleFilter = (category) => {
+  const index = selectedFilters.value.indexOf(category)
+  if (index === -1) {
+    selectedFilters.value.push(category)
+  } else {
+    selectedFilters.value.splice(index, 1)
+  }
+}
+
+let map = null
+
 onMounted(() => {
-  const map = L.map('map', {
+  map = L.map('map', {
     zoomControl: false,
   }).setView([58.010259, 56.234195], 5)
 
@@ -47,7 +78,19 @@ onMounted(() => {
 
   L.tileLayer.provider('CartoDB.DarkMatter').addTo(map)
 
-  clinics.forEach((clinic) => {
+  updateMarkers()
+})
+
+const updateMarkers = () => {
+  if (!map) return
+
+  map.eachLayer((layer) => {
+    if (layer instanceof L.Marker) {
+      map.removeLayer(layer)
+    }
+  })
+
+  filteredClinics.value.forEach((clinic) => {
     L.marker([clinic.lat, clinic.lng])
       .addTo(map)
       .on('click', () => {
@@ -55,12 +98,30 @@ onMounted(() => {
         dialog.value = true
       })
   })
-})
+}
 </script>
 
 <template>
   <div>
     <div id="map" style="height: 100vh"></div>
+
+    <v-btn class="filter-btn" icon size="large" @click="showFilters = !showFilters">
+      <v-icon icon="mdi-filter-variant"></v-icon>
+    </v-btn>
+
+    <transition name="fade">
+      <div v-if="showFilters" class="filters-container">
+        <div class="filters-panel">
+          <div class="filters-title">Фильтры</div>
+          <div class="filters-chips">
+            <button v-for="category in jobCategories" :key="category" class="glass-chip"
+              :class="{ active: selectedFilters.includes(category) }" @click="toggleFilter(category)">
+              {{ category }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
 
     <v-dialog v-model="dialog" max-width="500" scrim="transparent">
       <v-card v-if="selectedClinic" class="glass-card">
@@ -75,7 +136,7 @@ onMounted(() => {
 
         <div v-if="selectedClinic.videoUrl" class="video-container">
           <iframe :src="selectedClinic.videoUrl" style="border: none" allow="clipboard-write; autoplay"
-            webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+            webkitAllowFullScreen mozallowfullscreen allowFullScreen allowfullscreen></iframe>
         </div>
 
         <v-card-text class="glass-text">
@@ -88,14 +149,15 @@ onMounted(() => {
             <v-icon icon="mdi-web" size="small" class="glass-icon"></v-icon>
             <a :href="selectedClinic.website" target="_blank" class="glass-link">{{
               selectedClinic.website
-            }}</a>
+              }}</a>
           </div>
 
           <div class="glass-info-item" v-if="selectedClinic.vk">
-            <v-icon icon="mdi-vk-box" size="small" class="glass-icon"></v-icon>
+            <img src="/icons/vk-com.png" style="height: 20px; height: 20PX;" alt="">
+            <!-- <v-icon icon="mdi-vk-box" size="small" class="glass-icon"></v-icon> -->
             <a :href="selectedClinic.vk" target="_blank" class="glass-link">{{
               selectedClinic.vk
-            }}</a>
+              }}</a>
           </div>
 
           <div class="glass-info-item flex-col" v-if="selectedClinic.description">
@@ -132,6 +194,101 @@ onMounted(() => {
 <style>
 .leaflet-control-attribution {
   display: none;
+}
+
+.filter-btn {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  z-index: 1000 !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+.filters-container {
+  position: fixed !important;
+  top: 80px !important;
+  right: 20px !important;
+  z-index: 1000 !important;
+}
+
+.filters-panel {
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  padding: 16px;
+  min-width: 280px;
+}
+
+.filters-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.filters-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.glass-chip {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.glass-chip:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateX(4px);
+}
+
+.glass-chip.active {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.4), rgba(21, 101, 192, 0.4));
+  border-color: rgba(33, 150, 243, 0.6);
+  color: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 .glass-card {
