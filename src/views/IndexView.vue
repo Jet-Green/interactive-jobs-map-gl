@@ -6,6 +6,7 @@ import 'leaflet-providers'
 
 const dialog = ref(false)
 const showContacts = ref(false)
+const showConditions = ref(false)
 const selectedClinic = ref<any>(null)
 const showFilters = ref(false)
 const selectedFilters = ref<any[]>([])
@@ -121,7 +122,7 @@ const updateMarkers = () => {
     <div id="map" style="height: 100vh"></div>
 
     <div class="footer-overlay">
-      <v-btn size="x-large" class="footer-button" target="_blank" href="https://vk.ru/medical_scout">
+      <v-btn size="x-large" class="footer-button" @click="showConditions = true">
         Начать работу
       </v-btn>
       <div class="contacts-link" @click="showContacts = true">О компании</div>
@@ -154,7 +155,9 @@ const updateMarkers = () => {
           </div>
           <div class="contact-info-item">
             <div class="contact-label">ВК</div>
-            <a href="https://vk.ru/glazyrina_ag" target="_blank" class="contact-link">https://vk.ru/glazyrina_ag</a>
+            <a href="https://vk.ru/glazyrina_ag" target="_blank" class="contact-link"
+              >https://vk.ru/glazyrina_ag</a
+            >
           </div>
           <div class="contact-info-item">
             <div class="contact-label">Max</div>
@@ -176,8 +179,13 @@ const updateMarkers = () => {
         <div class="filters-panel">
           <div class="filters-title">Фильтры</div>
           <div class="filters-chips">
-            <button v-for="category in jobCategories" :key="category" class="glass-chip"
-              :class="{ active: selectedFilters.includes(category) }" @click="toggleFilter(category)">
+            <button
+              v-for="category in jobCategories"
+              :key="category"
+              class="glass-chip"
+              :class="{ active: selectedFilters.includes(category) }"
+              @click="toggleFilter(category)"
+            >
               {{ category }}
             </button>
           </div>
@@ -197,8 +205,15 @@ const updateMarkers = () => {
         </v-card-title>
 
         <div v-if="selectedClinic.videoUrl" class="video-container">
-          <iframe :src="selectedClinic.videoUrl" style="border: none" allow="clipboard-write; autoplay"
-            webkitAllowFullScreen mozallowfullscreen allowFullScreen allowfullscreen></iframe>
+          <iframe
+            :src="selectedClinic.videoUrl"
+            style="border: none"
+            allow="clipboard-write; autoplay"
+            webkitAllowFullScreen
+            mozallowfullscreen
+            allowFullScreen
+            allowfullscreen
+          ></iframe>
         </div>
 
         <v-card-text class="glass-text">
@@ -243,8 +258,45 @@ const updateMarkers = () => {
           </div>
 
           <div class="accent-button-container">
-            <v-btn size="x-large" class="accent-button" target="_blank" :href="'https://vk.ru/medical_scout'">
+            <v-btn size="x-large" class="accent-button" @click="showConditions = true">
               УЗНАТЬ УСЛОВИЯ
+            </v-btn>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="showConditions" max-width="400" scrim="transparent">
+      <v-card class="glass-card">
+        <v-card-title class="glass-title">
+          <div class="d-flex justify-space-between">
+            <span>Узнать условия</span>
+            <v-btn class="close-btn" @click="showConditions = false">
+              <v-icon icon="mdi-close" size="large"></v-icon>
+            </v-btn>
+          </div>
+        </v-card-title>
+        <v-card-text class="glass-text">
+          <div class="conditions-buttons">
+            <v-btn
+              size="x-large"
+              class="conditions-vk-btn"
+              target="_blank"
+              href="https://vk.ru/glazyrina_ag"
+              @click="showConditions = false"
+            >
+              <img src="/icons/vk-com.png" style="height: 24px; margin-right: 10px" alt="" />
+              ВКонтакте
+            </v-btn>
+            <v-btn
+              size="x-large"
+              class="conditions-max-btn"
+              target="_blank"
+              href="https://web.max.ru/182491727"
+              @click="showConditions = false"
+            >
+              <img src="/icons/max_logo.svg" style="height: 24px; margin-right: 10px" alt="" />
+              Max
             </v-btn>
           </div>
         </v-card-text>
@@ -529,9 +581,11 @@ const updateMarkers = () => {
 }
 
 .glass-img {
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.1),
-      rgba(255, 255, 255, 0.05)) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.05)
+  ) !important;
 }
 
 .video-container {
@@ -546,9 +600,11 @@ const updateMarkers = () => {
 }
 
 .glass-title {
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.2),
-      rgba(255, 255, 255, 0.1)) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.1)
+  ) !important;
   backdrop-filter: blur(10px);
   padding: 16px 20px !important;
   font-weight: 600 !important;
@@ -638,9 +694,11 @@ const updateMarkers = () => {
 }
 
 .glass-btn:hover {
-  background: linear-gradient(135deg,
-      rgba(0, 0, 0, 0.8),
-      rgba(0, 0, 0, 0.6) rgba(255, 255, 255, 0.15)) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.8),
+    rgba(0, 0, 0, 0.6) rgba(255, 255, 255, 0.15)
+  ) !important;
   transform: scale(1.02);
   box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
 }
@@ -698,5 +756,38 @@ const updateMarkers = () => {
 .glass-card {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+}
+
+.conditions-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.conditions-vk-btn,
+.conditions-max-btn {
+  width: 100%;
+  justify-content: flex-start;
+  padding-left: 20px !important;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.conditions-vk-btn {
+  background: #2787f5 !important;
+  color: white !important;
+}
+
+.conditions-vk-btn:hover {
+  background: #1a6fcf !important;
+}
+
+.conditions-max-btn {
+  background: #000 !important;
+  color: white !important;
+}
+
+.conditions-max-btn:hover {
+  background: #333 !important;
 }
 </style>
