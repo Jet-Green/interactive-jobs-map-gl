@@ -3,6 +3,9 @@ import { onMounted, ref, computed, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-providers'
+import 'leaflet.markercluster'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 
 const dialog = ref(false)
 const showContacts = ref(false)
@@ -49,12 +52,47 @@ const clinics = [
     videoUrl:
       'https://rutube.ru/play/embed/aac34142d9de4de977839c54860ca029//?r=https%3A%2F%2Fexample.com',
   },
+  {
+    id: 3,
+    jobName: 'Врач стоматолог',
+    address: 'Невский пр., д. 20, Санкт-Петербург',
+    website: 'https://example-clinic3.ru',
+    vk: 'https://vk.com/example3',
+    description: 'Центр стоматологии на Невском',
+    percent: '40% от чека',
+    microscope: 'бинокуляр',
+    chiefName: 'Сидоров Сидор Сидорович',
+    lat: 59.9355,
+    lng: 30.327,
+    videoUrl: '',
+  },
+  {
+    id: 4,
+    jobName: 'Средний медицинский персонал',
+    address: 'Московский пр., д. 45, Санкт-Петербург',
+    website: 'https://example-clinic4.ru',
+    vk: 'https://vk.com/example4',
+    description: 'Клиника с современным оборудованием',
+    percent: '35% от чека',
+    microscope: 'микроскоп',
+    chiefName: 'Кузнецова Анна Петровна',
+    lat: 59.928,
+    lng: 30.338,
+    videoUrl: '',
+  },
 ]
 
 const filteredClinics = computed(() => {
   if (selectedFilters.value.length === 0) return clinics
   return clinics.filter((c) => selectedFilters.value.includes(c.jobName))
 })
+
+const getMapCenter = () => {
+  if (clinics.length === 0) return [58.010259, 56.234195]
+  const avgLat = clinics.reduce((sum, c) => sum + c.lat, 0) / clinics.length
+  const avgLng = clinics.reduce((sum, c) => sum + c.lng, 0) / clinics.length
+  return [avgLat, avgLng]
+}
 
 watch(filteredClinics, () => {
   updateMarkers()
@@ -83,7 +121,7 @@ onMounted(() => {
   map = L.map('map', {
     zoomControl: false,
     attributionControl: false,
-  }).setView([58.010259, 56.234195], 5)
+  }).setView(getMapCenter(), 5)
 
   L.control.zoom({ position: 'bottomright' }).addTo(map)
 
@@ -98,23 +136,39 @@ onMounted(() => {
   updateMarkers()
 })
 
+let markerClusterGroup: any = null
+
 const updateMarkers = () => {
   if (!map) return
 
-  map.eachLayer((layer: any) => {
-    if (layer instanceof L.Marker) {
-      map.removeLayer(layer)
-    }
+  if (markerClusterGroup) {
+    map.removeLayer(markerClusterGroup)
+  }
+
+  markerClusterGroup = L.markerClusterGroup({
+    maxClusterRadius: 50,
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    iconCreateFunction: (cluster: any) => {
+      const count = cluster.getChildCount()
+      return L.divIcon({
+        html: `<div class="cluster-icon">${count}</div>`,
+        className: 'custom-cluster-icon',
+        iconSize: L.point(40, 40),
+      })
+    },
   })
 
   filteredClinics.value.forEach((clinic: any) => {
     L.marker([clinic.lat, clinic.lng])
-      .addTo(map)
       .on('click', () => {
         selectedClinic.value = clinic
         dialog.value = true
       })
+      .addTo(markerClusterGroup)
   })
+
+  map.addLayer(markerClusterGroup)
 }
 </script>
 
@@ -806,5 +860,74 @@ const updateMarkers = () => {
 
 .conditions-max-btn:hover {
   background: #333 !important;
+}
+
+.custom-cluster-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.cluster-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+  border: 3px solid white;
+}
+
+.marker-cluster-small {
+  background-color: rgba(110, 204, 57, 0.6) !important;
+}
+
+.marker-cluster-small div {
+  background-color: rgba(110, 204, 57, 0.8) !important;
+}
+
+.marker-cluster-medium {
+  background-color: rgba(240, 194, 12, 0.6) !important;
+}
+
+.marker-cluster-medium div {
+  background-color: rgba(240, 194, 12, 0.8) !important;
+}
+
+.marker-cluster-large {
+  background-color: rgba(241, 128, 23, 0.6) !important;
+}
+
+.marker-cluster-large div {
+  background-color: rgba(241, 128, 23, 0.8) !important;
+}
+
+.marker-cluster {
+  background-clip: padding-box;
+  border-radius: 50%;
+}
+
+.marker-cluster div {
+  width: 30px;
+  height: 30px;
+  margin-left: 5px;
+  margin-top: 5px;
+  text-align: center;
+  border-radius: 50%;
+  font:
+    12px 'Helvetica Neue',
+    Arial,
+    Helvetica,
+    sans-serif;
+  color: white;
+  font-weight: 600;
+}
+
+.marker-cluster span {
+  line-height: 30px;
 }
 </style>
