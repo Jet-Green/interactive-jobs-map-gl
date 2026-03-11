@@ -82,11 +82,18 @@ onMounted(() => {
 
   map = L.map('map', {
     zoomControl: false,
+    attributionControl: false,
   }).setView([58.010259, 56.234195], 5)
 
   L.control.zoom({ position: 'bottomright' }).addTo(map)
 
   L.tileLayer.provider('CartoDB.DarkMatter').addTo(map)
+
+  L.control
+    .attribution({ position: 'bottomright' })
+    .addAttribution(
+      '<a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+    )
 
   updateMarkers()
 })
@@ -292,7 +299,7 @@ const updateMarkers = () => {
               size="x-large"
               class="conditions-max-btn"
               target="_blank"
-              href="https://web.max.ru/182491727"
+              href="https://max.ru/join/UUaNuWKJCuqEnHyPsTDzTgnUQJvD4E2oUAQphGXSmoQ"
               @click="showConditions = false"
             >
               <img src="/icons/max_logo.svg" style="height: 24px; margin-right: 10px" alt="" />
@@ -470,7 +477,17 @@ const updateMarkers = () => {
 }
 
 .leaflet-control-attribution {
-  display: none;
+  background: rgba(255, 255, 255, 0.7) !important;
+  padding: 2px 8px !important;
+  font-size: 10px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #333 !important;
+}
+
+.leaflet-bottom.leaflet-right {
+  display: block !important;
 }
 
 .filter-btn {
