@@ -231,7 +231,17 @@ const updateMarkers = () => {
       </v-card>
     </v-dialog>
 
-    <v-btn class="filter-btn" icon size="large" @click="showFilters = !showFilters">
+    <v-badge
+      v-if="selectedFilters.length > 0"
+      :content="selectedFilters.length"
+      color="#667eea"
+      class="filter-badge"
+    >
+      <v-btn class="filter-btn" icon size="large" @click="showFilters = !showFilters">
+        <v-icon icon="mdi-filter-variant"></v-icon>
+      </v-btn>
+    </v-badge>
+    <v-btn v-else class="filter-btn" icon size="large" @click="showFilters = !showFilters">
       <v-icon icon="mdi-filter-variant"></v-icon>
     </v-btn>
 
@@ -562,6 +572,20 @@ const updateMarkers = () => {
   background: rgba(255, 255, 255, 0.25) !important;
   transform: scale(1.05);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+.filter-badge {
+  position: fixed !important;
+  top: 140px !important;
+  right: 20px !important;
+  z-index: 1000 !important;
+}
+
+.filter-badge .v-badge__badge {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  height: 20px !important;
+  min-width: 20px !important;
 }
 
 .filters-container {
