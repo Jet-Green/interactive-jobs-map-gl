@@ -192,12 +192,14 @@ const updateMarkers = () => {
     <v-dialog v-model="showContacts" max-width="400" scrim="transparent">
       <v-card class="glass-card">
         <v-card-title class="glass-title">
-          <div class="d-flex justify-space-between">
-            <span>О компании</span>
-            <v-btn class="close-btn" @click="showContacts = false">
-              <v-icon icon="mdi-close" size="large"></v-icon>
-            </v-btn>
-          </div>
+          <v-row align="center" justify="space-between" no-gutters>
+            <v-col cols="10">О компании</v-col>
+            <v-col cols="2" class="text-right">
+              <v-btn class="close-btn" @click="showContacts = false">
+                <v-icon icon="mdi-close" size="large"></v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-card-title>
         <v-card-text class="glass-text">
           <div class="contact-info-item">
@@ -266,13 +268,15 @@ const updateMarkers = () => {
 
     <v-dialog v-model="dialog" max-width="500" scrim="transparent">
       <v-card v-if="selectedClinic" class="glass-card">
-        <v-card-title class="text-h5 glass-title">
-          <div class="d-flex justify-space-between">
-            <span class="glass-title-text">{{ selectedClinic.jobName }}</span>
-            <v-btn class="close-btn" @click="dialog = false">
-              <v-icon icon="mdi-close" size="large"></v-icon>
-            </v-btn>
-          </div>
+        <v-card-title class="glass-title">
+          <v-row align="center" justify="space-between" no-gutters>
+            <v-col cols="10" class="glass-title-text">{{ selectedClinic.jobName }}</v-col>
+            <v-col cols="2" class="text-right">
+              <v-btn class="close-btn" @click="dialog = false">
+                <v-icon icon="mdi-close" size="large"></v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-card-title>
 
         <div v-if="selectedClinic.videoUrl" class="video-container">
@@ -340,12 +344,14 @@ const updateMarkers = () => {
     <v-dialog v-model="showConditions" max-width="400" scrim="transparent">
       <v-card class="glass-card">
         <v-card-title class="glass-title">
-          <div class="d-flex justify-space-between">
-            <span>Узнать условия</span>
-            <v-btn class="close-btn" @click="showConditions = false">
-              <v-icon icon="mdi-close" size="large"></v-icon>
-            </v-btn>
-          </div>
+          <v-row align="center" justify="space-between" no-gutters>
+            <v-col cols="10">Узнать условия</v-col>
+            <v-col cols="2" class="text-right">
+              <v-btn class="close-btn" @click="showConditions = false">
+                <v-icon icon="mdi-close" size="large"></v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-card-title>
         <v-card-text class="glass-text">
           <div class="conditions-buttons">
@@ -672,7 +678,10 @@ const updateMarkers = () => {
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     inset 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
-  overflow: hidden;
+  overflow-y: auto !important;
+  max-height: 90vh !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .glass-img {
@@ -708,16 +717,26 @@ const updateMarkers = () => {
   word-break: break-word;
   white-space: normal;
   display: flex;
-  justify-self: space-between !important;
-  /* align-items: flex-start; */
-  /* gap: 12px; */
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 12px;
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 10;
+  flex-shrink: 0;
 }
 
 .glass-title-text {
-  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 18px;
+}
+
+@media (max-width: 400px) {
+  .glass-title-text {
+    font-size: 14px;
+  }
 }
 
 .close-btn {
@@ -731,6 +750,8 @@ const updateMarkers = () => {
 .glass-text {
   color: rgba(255, 255, 255, 0.85) !important;
   padding: 16px 20px !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
 }
 
 .glass-info-item {
