@@ -6,6 +6,7 @@ import 'leaflet-providers'
 import 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
+import { clinics } from '../data/vacancies'
 
 const dialog = ref(false)
 const showContacts = ref(false)
@@ -21,80 +22,30 @@ const jobCategories = [
   'Главврач, управляющий',
 ]
 
-const clinics = [
-  {
-    id: 1,
-    jobName: 'Врач стоматолог',
-    address: 'ул. Примерная, д. 10, Москва',
-    website: 'https://example-clinic.ru',
-    vk: 'https://vk.com/example',
-    description: 'Современная стоматологическая клиника с новейшим оборудованием',
-    percent: 'от 40% + индивидуальные условия',
-    microscope: 'бинокуляр',
-    chiefName: 'Иванов Иван Иванович',
-    lat: 52.3676,
-    lng: 4.9041,
-    videoUrl:
-      'https://rutube.ru/play/embed/06ba0043e2957dbcce7ecb0f439413b0//?r=https%3A%2F%2Fexample.com',
-  },
-  {
-    id: 2,
-    jobName: 'Врач стоматолог',
-    address: 'ул. Ленина, д. 5, Санкт-Петербург',
-    website: 'https://example-clinic2.ru',
-    vk: 'https://vk.com/example2',
-    description: 'Клиника с 20-летним опытом работы',
-    percent: '45% от чека',
-    microscope: 'микроскоп',
-    chiefName: 'Петров Петр Петрович',
-    lat: 59.9343,
-    lng: 30.3351,
-    videoUrl:
-      'https://rutube.ru/play/embed/aac34142d9de4de977839c54860ca029//?r=https%3A%2F%2Fexample.com',
-  },
-  {
-    id: 3,
-    jobName: 'Врач стоматолог',
-    address: 'Невский пр., д. 20, Санкт-Петербург',
-    website: 'https://example-clinic3.ru',
-    vk: 'https://vk.com/example3',
-    description: 'Центр стоматологии на Невском',
-    percent: '40% от чека',
-    microscope: 'бинокуляр',
-    chiefName: 'Сидоров Сидор Сидорович',
-    lat: 59.9355,
-    lng: 30.327,
-    videoUrl: '',
-  },
-  {
-    id: 4,
-    jobName: 'Средний медицинский персонал',
-    address: 'Московский пр., д. 45, Санкт-Петербург',
-    website: 'https://example-clinic4.ru',
-    vk: 'https://vk.com/example4',
-    description: 'Клиника с современным оборудованием',
-    percent: '35% от чека',
-    microscope: 'микроскоп',
-    chiefName: 'Кузнецова Анна Петровна',
-    lat: 59.928,
-    lng: 30.338,
-    videoUrl: '',
-  },
-]
+const hasValidCoords = (c: { lat: unknown; lng: unknown }) =>
+  typeof c.lat === 'number' &&
+  typeof c.lng === 'number' &&
+  Number.isFinite(c.lat) &&
+  Number.isFinite(c.lng)
 
 const filteredClinics = computed(() => {
   if (selectedFilters.value.length === 0) return clinics
-  return clinics.filter((c) => selectedFilters.value.includes(c.jobName))
+  return clinics.filter(
+    (c) => c.jobName && selectedFilters.value.includes(c.jobName),
+  )
 })
 
-const getMapCenter = () => {
-  if (clinics.length === 0) return [58.010259, 56.234195]
-  const avgLat = clinics.reduce((sum, c) => sum + c.lat, 0) / clinics.length
-  const avgLng = clinics.reduce((sum, c) => sum + c.lng, 0) / clinics.length
+const clinicsOnMap = computed(() => filteredClinics.value.filter(hasValidCoords))
+
+const getMapCenter = (): [number, number] => {
+  const withCoords = clinicsOnMap.value
+  if (withCoords.length === 0) return [58.010259, 56.234195]
+  const avgLat = withCoords.reduce((sum, c) => sum + c.lat, 0) / withCoords.length
+  const avgLng = withCoords.reduce((sum, c) => sum + c.lng, 0) / withCoords.length
   return [avgLat, avgLng]
 }
 
-watch(filteredClinics, () => {
+watch(clinicsOnMap, () => {
   updateMarkers()
 })
 
@@ -154,12 +105,13 @@ const updateMarkers = () => {
       return L.divIcon({
         html: `<div class="cluster-icon">${count}</div>`,
         className: 'custom-cluster-icon',
-        iconSize: L.point(40, 40),
+        iconSize: L.point(50, 50),
       })
     },
   })
 
-  filteredClinics.value.forEach((clinic: any) => {
+  clinicsOnMap.value.forEach((clinic: any) => {
+    if (!hasValidCoords(clinic)) return
     L.marker([clinic.lat, clinic.lng])
       .on('click', () => {
         selectedClinic.value = clinic
@@ -218,9 +170,7 @@ const updateMarkers = () => {
           </div>
           <div class="contact-info-item">
             <div class="contact-label">ВК</div>
-            <a href="https://vk.ru/glazyrina_ag" target="_blank" class="contact-link"
-              >https://vk.ru/glazyrina_ag</a
-            >
+            <a href="https://vk.ru/glazyrina_ag" target="_blank" class="contact-link">https://vk.ru/glazyrina_ag</a>
           </div>
           <div class="contact-info-item">
             <div class="contact-label">Max</div>
@@ -233,12 +183,7 @@ const updateMarkers = () => {
       </v-card>
     </v-dialog>
 
-    <v-badge
-      v-if="selectedFilters.length > 0"
-      :content="selectedFilters.length"
-      color="#667eea"
-      class="filter-badge"
-    >
+    <v-badge v-if="selectedFilters.length > 0" :content="selectedFilters.length" color="#667eea" class="filter-badge">
       <v-btn class="filter-btn" icon size="large" @click="showFilters = !showFilters">
         <v-icon icon="mdi-filter-variant"></v-icon>
       </v-btn>
@@ -252,13 +197,8 @@ const updateMarkers = () => {
         <div class="filters-panel">
           <div class="filters-title">Фильтры</div>
           <div class="filters-chips">
-            <button
-              v-for="category in jobCategories"
-              :key="category"
-              class="glass-chip"
-              :class="{ active: selectedFilters.includes(category) }"
-              @click="toggleFilter(category)"
-            >
+            <button v-for="category in jobCategories" :key="category" class="glass-chip"
+              :class="{ active: selectedFilters.includes(category) }" @click="toggleFilter(category)">
               {{ category }}
             </button>
           </div>
@@ -267,10 +207,20 @@ const updateMarkers = () => {
     </transition>
 
     <v-dialog v-model="dialog" max-width="500" scrim="transparent">
-      <v-card v-if="selectedClinic" class="glass-card">
+      <v-card v-if="selectedClinic" class="glass-card vacancy-card">
         <v-card-title class="glass-title">
           <v-row align="center" justify="space-between" no-gutters>
-            <v-col cols="10" class="glass-title-text">{{ selectedClinic.jobName }}</v-col>
+            <v-col cols="10" class="glass-title-stack">
+              <div class="glass-title-text">
+                {{ selectedClinic.vacancyTitle || selectedClinic.jobName || 'Вакансия' }}
+              </div>
+              <div v-if="selectedClinic.organization || selectedClinic.city" class="glass-title-org">
+                <template v-if="selectedClinic.organization">{{ selectedClinic.organization }}</template>
+                <template v-if="selectedClinic.organization && selectedClinic.city"> · </template>
+                <template v-if="selectedClinic.city">{{ selectedClinic.city }}</template>
+              </div>
+              <div v-if="selectedClinic.jobName" class="glass-title-cat">{{ selectedClinic.jobName }}</div>
+            </v-col>
             <v-col cols="2" class="text-right">
               <v-btn class="close-btn" @click="dialog = false">
                 <v-icon icon="mdi-close" size="large"></v-icon>
@@ -280,18 +230,11 @@ const updateMarkers = () => {
         </v-card-title>
 
         <div v-if="selectedClinic.videoUrl" class="video-container">
-          <iframe
-            :src="selectedClinic.videoUrl"
-            style="border: none"
-            allow="clipboard-write; autoplay"
-            webkitAllowFullScreen
-            mozallowfullscreen
-            allowFullScreen
-            allowfullscreen
-          ></iframe>
+          <iframe :src="selectedClinic.videoUrl" style="border: none" allow="clipboard-write; autoplay"
+            webkitAllowFullScreen mozallowfullscreen allowFullScreen allowfullscreen></iframe>
         </div>
 
-        <v-card-text class="glass-text">
+        <v-card-text class="glass-text" style="padding-bottom: 0 !important;">
           <div class="glass-info-item" v-if="selectedClinic.address">
             <v-icon icon="mdi-map-marker" size="small" class="glass-icon"></v-icon>
             {{ selectedClinic.address }}
@@ -355,23 +298,13 @@ const updateMarkers = () => {
         </v-card-title>
         <v-card-text class="glass-text">
           <div class="conditions-buttons">
-            <v-btn
-              size="x-large"
-              class="conditions-vk-btn"
-              target="_blank"
-              href="https://vk.ru/glazyrina_ag"
-              @click="showConditions = false"
-            >
+            <v-btn size="x-large" class="conditions-vk-btn" target="_blank" href="https://vk.ru/glazyrina_ag"
+              @click="showConditions = false">
               <img src="/icons/vk-com.png" style="height: 24px; margin-right: 10px" alt="" />
               ВКонтакте
             </v-btn>
-            <v-btn
-              size="x-large"
-              class="conditions-max-btn"
-              target="_blank"
-              href="https://max.ru/join/UUaNuWKJCuqEnHyPsTDzTgnUQJvD4E2oUAQphGXSmoQ"
-              @click="showConditions = false"
-            >
+            <v-btn size="x-large" class="conditions-max-btn" target="_blank"
+              href="https://max.ru/join/UUaNuWKJCuqEnHyPsTDzTgnUQJvD4E2oUAQphGXSmoQ" @click="showConditions = false">
               <img src="/icons/max_logo.svg" style="height: 24px; margin-right: 10px" alt="" />
               Max
             </v-btn>
@@ -685,11 +618,9 @@ const updateMarkers = () => {
 }
 
 .glass-img {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.05)
-  ) !important;
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.05)) !important;
 }
 
 .video-container {
@@ -704,11 +635,9 @@ const updateMarkers = () => {
 }
 
 .glass-title {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.2),
-    rgba(255, 255, 255, 0.1)
-  ) !important;
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.2),
+      rgba(255, 255, 255, 0.1)) !important;
   backdrop-filter: blur(10px);
   padding: 16px 20px !important;
   font-weight: 600 !important;
@@ -726,16 +655,42 @@ const updateMarkers = () => {
   flex-shrink: 0;
 }
 
+.glass-title-stack {
+  min-width: 0;
+}
+
 .glass-title-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.glass-title-org {
+  margin-top: 8px;
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.glass-title-cat {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(129, 212, 250, 0.95);
+  font-weight: 500;
 }
 
 @media (max-width: 400px) {
   .glass-title-text {
-    font-size: 14px;
+    font-size: 15px;
+  }
+
+  .glass-title-org {
+    font-size: 17px;
   }
 }
 
@@ -752,6 +707,10 @@ const updateMarkers = () => {
   padding: 16px 20px !important;
   flex: 1 !important;
   overflow-y: auto !important;
+}
+
+.vacancy-card .glass-text {
+  padding: 16px 20px 28px !important;
 }
 
 .glass-info-item {
@@ -810,11 +769,9 @@ const updateMarkers = () => {
 }
 
 .glass-btn:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.8),
-    rgba(0, 0, 0, 0.6) rgba(255, 255, 255, 0.15)
-  ) !important;
+  background: linear-gradient(135deg,
+      rgba(0, 0, 0, 0.8),
+      rgba(0, 0, 0, 0.6) rgba(255, 255, 255, 0.15)) !important;
   transform: scale(1.02);
   box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
 }
@@ -843,6 +800,11 @@ const updateMarkers = () => {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
+}
+
+.vacancy-card .accent-button-container {
+  margin: 0 -20px 0 -20px;
+  padding: 18px 20px 22px;
 }
 
 .accent-button:hover {
