@@ -363,35 +363,35 @@ const updateMarkers = () => {
   transform: translateX(-50%);
   z-index: 1000;
   text-align: center;
-  background: rgba(255, 255, 255, 0.85);
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.2), rgba(21, 101, 192, 0.2));
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(33, 150, 243, 0.25);
   border-radius: 20px;
   padding: 16px 32px;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.15),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px rgba(33, 150, 243, 0.15);
 }
 
 .header-title {
   font-size: 24px;
   font-weight: 700;
-  color: #1a1a2e;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   margin-bottom: 4px;
 }
 
 .header-subtitle {
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.6);
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   margin-bottom: 8px;
 }
 
 .header-stats {
-  font-size: 13px;
-  color: #1976d2;
-  font-weight: 600;
+  font-size: 14px;
+  color: #1565c0;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 600px) {
