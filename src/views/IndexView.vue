@@ -45,6 +45,12 @@ const getMapCenter = (): [number, number] => {
   return [avgLat, avgLng]
 }
 
+/** На телефоне — более отдалённый стартовый зум, чтобы было видно больше точек. */
+const getInitialZoom = (): number => {
+  if (typeof window === 'undefined') return 5
+  return window.matchMedia('(max-width: 600px)').matches ? 3 : 5
+}
+
 watch(clinicsOnMap, () => {
   updateMarkers()
 })
@@ -72,7 +78,7 @@ onMounted(() => {
   map = L.map('map', {
     zoomControl: false,
     attributionControl: false,
-  }).setView(getMapCenter(), 5)
+  }).setView(getMapCenter(), getInitialZoom())
 
   L.control.zoom({ position: 'bottomright' }).addTo(map)
 
