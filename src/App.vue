@@ -2,7 +2,12 @@
 import { ref } from 'vue'
 import { useHead } from '@vueuse/head'
 
+const openVk = () => {
+  window.open('https://vk.ru/glazyrina_ag', '_blank')
+}
+
 const showDialog = ref(true)
+const showDetails = ref(false)
 
 useHead({
   title: 'Медицинский скаут - вакансии для врачей и медперсонала',
@@ -39,15 +44,54 @@ useHead({
       </v-main>
     </v-app>
 
-    <v-dialog v-model="showDialog" max-width="500" scrim="transparent">
+    <v-dialog v-model="showDialog" max-width="500" scrim="rgba(0,0,0,0.5)">
+      <v-card class="glass-card">
+        <v-card-text class="glass-text">
+          <div class="vacancies-header">
+            <div class="vacancies-stats">
+              <div class="vacancies-label">За последний месяц было закрыто</div>
+              <div class="vacancies-stat-item" @click="showDetails = true" style="cursor: pointer">
+                <span class="vacancies-stat-number" style="cursor: pointer">5</span>
+                <span class="vacancies-stat-label" style="position: relative">
+                  вакансий
+                  <v-icon
+                    size="x-small"
+                    style="
+                      font-size: 18px;
+                      position: absolute;
+                      top: 0;
+                      right: -20px;
+                      transform: translateY(-25%);
+                      cursor: pointer;
+                    "
+                    >mdi-open-in-new</v-icon
+                  >
+                </span>
+              </div>
+              <div class="vacancies-stat-item">
+                <span class="vacancies-stat-number">4</span>
+                <span class="vacancies-stat-label">города</span>
+              </div>
+            </div>
+          </div>
+          <div class="ad-placeholder" @click="openVk()" style="cursor: pointer">
+            Здесь могла быть ваша реклама
+          </div>
+        </v-card-text>
+        <div class="accent-button-container report-dialog-footer" style="padding-bottom: 0">
+          <v-btn size="x-large" class="accent-button" @click="showDialog = false"> Хорошо </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="showDetails" max-width="500" scrim="rgba(0,0,0,0.5)">
       <v-card class="glass-card">
         <v-card-title class="glass-title">
           <v-row align="center" justify="space-between" no-gutters>
-            <v-col cols="10">Отчет за март</v-col>
+            <v-col cols="10">Закрытые вакансии</v-col>
           </v-row>
         </v-card-title>
         <v-card-text class="glass-text">
-          <div class="vacancies-subtitle">ВАКАНСИИ ЗАКРЫТЫ:</div>
           <ol class="vacancies-list">
             <li class="vacancies-item">Стоматолог терапевт - стоматология Лана (Пермь)</li>
             <li class="vacancies-item">Стоматолог ортопед - Новая стоматология (ст.Динская)</li>
@@ -57,7 +101,7 @@ useHead({
           </ol>
         </v-card-text>
         <div class="accent-button-container report-dialog-footer" style="padding-bottom: 0">
-          <v-btn size="x-large" class="accent-button" @click="showDialog = false"> Хорошо </v-btn>
+          <v-btn size="x-large" class="accent-button" @click="showDetails = false"> Закрыть </v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -73,6 +117,60 @@ useHead({
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.vacancies-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.vacancies-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  text-align: left;
+}
+
+.vacancies-label {
+  font-size: clamp(16px, 4vw, 22px);
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.vacancies-stat-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: start;
+  gap: 10px;
+}
+
+.vacancies-stat-number {
+  font-size: clamp(28px, 8vw, 42px);
+  font-weight: 700;
+  color: #1565c0;
+  line-height: 1;
+}
+
+.vacancies-stat-label {
+  font-size: clamp(16px, 4vw, 22px);
+  color: rgba(0, 0, 0, 0.75);
+  font-weight: 500;
+}
+
+.ad-placeholder {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px dashed rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: clamp(14px, 3vw, 18px);
+  font-weight: 500;
 }
 
 .vacancies-subtitle {
