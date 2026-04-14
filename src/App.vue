@@ -1,7 +1,30 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useHead } from '@vueuse/head'
 
 const showDialog = ref(true)
+
+useHead({
+  title: 'Медицинский скаут - вакансии для врачей и медперсонала',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'Поиск вакансий для врачей стоматологов, среднего и младшего медицинского персонала. 70+ организаций нашли своих специалистов.',
+    },
+    {
+      name: 'keywords',
+      content: 'вакансии, врачи, стоматолог, медицинский персонал, работа, найти работу',
+    },
+    { property: 'og:title', content: 'Медицинский скаут - вакансии для врачей и медперсонала' },
+    {
+      property: 'og:description',
+      content: 'Поиск вакансий для врачей стоматологов, среднего и младшего медицинского персонала',
+    },
+    { property: 'og:type', content: 'website' },
+  ],
+  link: [{ rel: 'canonical', href: 'https://dental-job.ru' }],
+})
 </script>
 
 <template>
@@ -33,7 +56,7 @@ const showDialog = ref(true)
             <li class="vacancies-item">Администратор и ассистент - Аника Дент (г. Москва)</li>
           </ol>
         </v-card-text>
-        <div class="accent-button-container report-dialog-footer" style="padding-bottom: 0;">
+        <div class="accent-button-container report-dialog-footer" style="padding-bottom: 0">
           <v-btn size="x-large" class="accent-button" @click="showDialog = false"> Хорошо </v-btn>
         </div>
       </v-card>
