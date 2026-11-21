@@ -5,3 +5,8 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* A light raster fallback when WebGL or the vector service is unavailable. */
+.map-fallback-tile {
+  filter: grayscale(1) brightness(1.12) contrast(0.8);
+}

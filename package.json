@@ -14,6 +14,7 @@
   "dependencies": {
     "@fontsource-variable/montserrat": "^5.2.8",
     "@fontsource/montserrat": "^5.2.8",
+    "@maplibre/maplibre-gl-leaflet": "^0.1.4",
     "@mdi/font": "^7.4.47",
     "@types/leaflet.markercluster": "^1.5.6",
     "@vee-validate/yup": "^4.15.1",
@@ -25,6 +26,7 @@
     "leaflet": "^1.9.4",
     "leaflet-providers": "^3.0.0",
     "leaflet.markercluster": "^1.5.3",
+    "maplibre-gl": "^6.19.0",
     "pinia": "^3.0.4",
     "vee-validate": "^4.15.1",
     "vue": "^3.5.27",

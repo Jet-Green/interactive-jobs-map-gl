@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, watch } from 'vue'
+import { onMounted, onBeforeUnmount, ref, computed, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import { clinics } from '../data/vacancies'
+import { addBasemap } from '../lib/mapBasemap'
 
 const publicAssetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`
 
@@ -64,6 +65,13 @@ const toggleFilter = (category: any) => {
 }
 
 let map: any = null
+let disposeBasemap: (() => void) | undefined
+
+onBeforeUnmount(() => {
+  disposeBasemap?.()
+  map?.remove()
+  map = null
+})
 
 onMounted(() => {
   // Fix for marker icons in production
@@ -77,19 +85,17 @@ onMounted(() => {
   map = L.map('map', {
     zoomControl: false,
     attributionControl: false,
+    minZoom: 1,
+    maxZoom: 19,
+    maxBounds: [[-85, -Infinity], [85, Infinity]],
+    maxBoundsViscosity: 1,
   }).setView(getMapCenter(), getInitialZoom())
 
   L.control.zoom({ position: 'bottomright' }).addTo(map)
 
-  // CARTO's legacy endpoint returns "API KEY REQUIRED" images without a key.
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>',
-  }).addTo(map)
-
   // Keep the licence visible above the fixed footer, including on small screens.
   L.control.attribution({ position: 'topright', prefix: false }).addTo(map)
+  disposeBasemap = addBasemap(map)
 
   updateMarkers()
 })
