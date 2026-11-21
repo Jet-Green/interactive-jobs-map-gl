@@ -6,7 +6,14 @@ html {
   scroll-behavior: smooth;
 }
 
-/* A light raster fallback when WebGL or the vector service is unavailable. */
+/* Match the vector background while the map starts or loads newly exposed areas. */
+#map,
+#map .maplibregl-map,
+#map .maplibregl-canvas-container {
+  background: rgb(12, 12, 12);
+}
+
+/* Keep the map dark when WebGL or the vector service is unavailable. */
 .map-fallback-tile {
-  filter: grayscale(1) brightness(1.12) contrast(0.8);
+  filter: grayscale(1) invert(1) brightness(0.75) contrast(1.1);
 }

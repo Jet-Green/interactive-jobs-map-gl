@@ -43,7 +43,7 @@ export function addBasemap(map: L.Map): () => void {
       setWorkerUrl(workerUrl)
       timer = setTimeout(useFallback, 12000)
       const layer = maplibreGL({
-        style: 'https://tiles.openfreemap.org/styles/positron',
+        style: 'https://tiles.openfreemap.org/styles/dark',
         attributionControl: false,
         // Prefer Russian names where supplied by OpenMapTiles, then local names.
         transformStyle: (_previous, next) => {
