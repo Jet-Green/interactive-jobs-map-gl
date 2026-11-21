@@ -2,11 +2,12 @@
 import { onMounted, ref, computed, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import 'leaflet-providers'
 import 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import { clinics } from '../data/vacancies'
+
+const publicAssetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`
 
 const dialog = ref(false)
 const showContacts = ref(false)
@@ -80,13 +81,15 @@ onMounted(() => {
 
   L.control.zoom({ position: 'bottomright' }).addTo(map)
 
-  L.tileLayer.provider('CartoDB.Positron').addTo(map)
+  // CARTO's legacy endpoint returns "API KEY REQUIRED" images without a key.
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>',
+  }).addTo(map)
 
-  L.control
-    .attribution({ position: 'bottomright' })
-    .addAttribution(
-      '<a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
-    )
+  // Keep the licence visible above the fixed footer, including on small screens.
+  L.control.attribution({ position: 'topright', prefix: false }).addTo(map)
 
   updateMarkers()
 })
@@ -278,7 +281,7 @@ const updateMarkers = () => {
           </div>
 
           <div class="glass-info-item" v-if="selectedClinic.vk">
-            <img src="/icons/vk-com.png" style="height: 20px; height: 20px" alt="" />
+            <img :src="publicAssetUrl('icons/vk-com.png')" style="height: 20px; height: 20px" alt="" />
             <!-- <v-icon icon="mdi-vk-box" size="small" class="glass-icon"></v-icon> -->
             <a :href="selectedClinic.vk" target="_blank" class="glass-link">{{
               selectedClinic.vk
@@ -335,7 +338,7 @@ const updateMarkers = () => {
               href="https://vk.ru/glazyrina_ag"
               @click="showConditions = false"
             >
-              <img src="/icons/vk-com.png" style="height: 24px; margin-right: 10px" alt="" />
+              <img :src="publicAssetUrl('icons/vk-com.png')" style="height: 24px; margin-right: 10px" alt="" />
               ВКонтакте
             </v-btn>
             <v-btn
@@ -345,7 +348,7 @@ const updateMarkers = () => {
               href="https://max.ru/join/UUaNuWKJCuqEnHyPsTDzTgnUQJvD4E2oUAQphGXSmoQ"
               @click="showConditions = false"
             >
-              <img src="/icons/max_logo.svg" style="height: 24px; margin-right: 10px" alt="" />
+              <img :src="publicAssetUrl('icons/max_logo.svg')" style="height: 24px; margin-right: 10px" alt="" />
               Max
             </v-btn>
           </div>
@@ -433,6 +436,11 @@ const updateMarkers = () => {
   align-items: center;
   gap: 12px;
   padding: 20px;
+  pointer-events: none;
+}
+
+.footer-overlay > * {
+  pointer-events: auto;
 }
 
 .contacts-link {

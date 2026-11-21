@@ -13,7 +13,7 @@ const router = createRouter({
     if (savedPosition) return savedPosition
     return { top: 0 }
   },
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(new URL(import.meta.env.BASE_URL, window.location.href).pathname),
   routes: [
     {
       path: '/',

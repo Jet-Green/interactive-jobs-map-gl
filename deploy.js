@@ -69,45 +69,6 @@ const uploadFile = async (filePath) => {
   console.log(`✅ Загружен: ${key}`);
 };
 
-// Удаление файлов, которых больше нет в локальной сборке
-const deleteObsoleteFiles = async (localFiles) => {
-  const localKeys = new Set(
-    localFiles.map((f) => path.relative(BUILD_DIR, f).replace(/\\/g, '/'))
-  );
-
-  let continuationToken = null;
-  let deletedCount = 0;
-
-  do {
-    const listParams = {
-      Bucket: BUCKET_NAME,
-      ContinuationToken: continuationToken,
-    };
-
-    const data = await s3.listObjectsV2(listParams).promise();
-    const remoteKeys = (data.Contents || []).map((obj) => obj.Key);
-
-    const toDelete = remoteKeys.filter((key) => !localKeys.has(key));
-    if (toDelete.length > 0) {
-      const deleteParams = {
-        Bucket: BUCKET_NAME,
-        Delete: {
-          Objects: toDelete.map((Key) => ({ Key })),
-        },
-      };
-      await s3.deleteObjects(deleteParams).promise();
-      deletedCount += toDelete.length;
-      toDelete.forEach((key) => console.log(`🗑️ Удалён устаревший файл: ${key}`));
-    }
-
-    continuationToken = data.NextContinuationToken;
-  } while (continuationToken);
-
-  if (deletedCount > 0) {
-    console.log(`🗑️ Всего удалено устаревших файлов: ${deletedCount}`);
-  }
-};
-
 // Основная функция деплоя
 async function deploy() {
   if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
@@ -121,25 +82,21 @@ async function deploy() {
   console.log(`🚀 Начинаем деплой в бакет: ${BUCKET_NAME}`);
   console.log(`📁 Папка сборки: ${BUILD_DIR}`);
 
-  // Получаем файлы
+  const entry = path.join(BUILD_DIR, 'index.html');
   const files = getFiles(BUILD_DIR);
-  if (files.length === 0) {
-    throw new Error('❌ Нет файлов для загрузки!');
+  if (!files.includes(entry)) {
+    throw new Error('В сборке отсутствует index.html');
   }
 
-  console.log(`📂 Найдено файлов: ${files.length}`);
-
-  // Удаляем устаревшие (опционально — можно закомментировать при первом запуске)
-  await deleteObsoleteFiles(files);
-
-  // Загружаем все файлы параллельно (но не слишком много)
+  // Старый HTML может ещё находиться в кэше у посетителей.
+  // Сначала публикуем ресурсы, затем переключаем входную страницу.
+  const assets = files.filter((file) => file !== entry);
   const batchSize = 10;
-  for (let i = 0; i < files.length; i += batchSize) {
-    const batch = files.slice(i, i + batchSize);
-    await Promise.all(batch.map(uploadFile));
+  for (let i = 0; i < assets.length; i += batchSize) {
+    await Promise.all(assets.slice(i, i + batchSize).map(uploadFile));
   }
-
-  console.log(`✅ Деплой завершён! Сайт доступен по: https://${BUCKET_NAME}`);
+  await uploadFile(entry);
+  console.log(`✅ Сборка опубликована в бакете ${BUCKET_NAME}`);
 }
 
 // Запуск
