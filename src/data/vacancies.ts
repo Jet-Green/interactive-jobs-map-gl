@@ -4,6 +4,7 @@ export type VacancySourceRow = {
   organization: string
   city: string
   videoLink: string
+  workplaceUrl?: string
   address: string
   vacancy: string
   position: string
@@ -35,6 +36,7 @@ export type ClinicRecord = {
   microscope: string
   chiefName: string
   videoUrl: string
+  workplaceUrl?: string
   lat: number
   lng: number
 }
@@ -212,6 +214,7 @@ export function parseVacanciesJson(rows: VacancySourceRow[]): ClinicRecord[] {
       videoUrl,
       lat,
       lng,
+      workplaceUrl: row.workplaceUrl,
     }
   })
 }

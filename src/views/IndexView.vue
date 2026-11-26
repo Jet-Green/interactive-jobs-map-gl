@@ -286,6 +286,13 @@ const updateMarkers = () => {
             }}</a>
           </div>
 
+          <div class="glass-info-item" v-if="selectedClinic.workplaceUrl">
+            <v-icon icon="mdi-image-multiple" size="small" class="glass-icon"></v-icon>
+            <a :href="selectedClinic.workplaceUrl" target="_blank" rel="noopener" class="glass-link">
+              Посмотреть рабочее место
+            </a>
+          </div>
+
           <div class="glass-info-item" v-if="selectedClinic.vk">
             <img :src="publicAssetUrl('icons/vk-com.png')" style="height: 20px; height: 20px" alt="" />
             <!-- <v-icon icon="mdi-vk-box" size="small" class="glass-icon"></v-icon> -->
